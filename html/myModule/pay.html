@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>我的账户</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="../../css/mui.min.css">
+		<!--<link rel="stylesheet" type="text/css" href="../css/app.css"/>-->
+		<link rel="stylesheet" href="../../css/H5+/common.css" type="text/css" charset="utf-8"/>
+			<style type="text/css">
+			#total{
+				-webkit-user-select:text;
+				text-align:right;
+				padding:0 1em;
+				border: 0px;
+				border-bottom:1px solid #ECB100;
+				border-radius: 0;
+				font-size:16px;
+				width:30%;
+				outline:none;
+			}
+			html,body,div,
+			p{
+				/*background-color: #efeff4;*/
+				background-color: transparent!important;
+			}
+			.myAccountBg{
+				padding: 0.5em 1em;
+				
+				text-align: center;
+			}
+			.account{
+				color: #EC7600;
+			}
+			.paybtn{
+				background-color: #EC971F!important;
+			}
+		</style>
+		<script type="text/javascript" src="../../js/h5+/common.js"></script>
+		
+		<script type="text/javascript">
+		var pays={};
+		function plusReady(){
+			// 获取支付通道
+			plus.payment.getChannels(function(channels){
+				var content=document.getElementById('dcontent');
+				var info=document.getElementById('info');
+				var txt='支付通道信息：';
+				for(var i in channels){
+					var channel=channels[i];
+					if(channel.id=='qhpay'||channel.id=='qihoo'){	// 过滤掉不支持的支付通道：暂不支持360相关支付
+						continue;
+					}
+					pays[channel.id]=channel;
+					txt += channel.description+"   ";
+					var de=document.createElement('div');
+					de.setAttribute('class', 'button paybtn');
+					de.setAttribute('onclick', 'pay(this.id)');
+					de.id=channel.id;
+					de.innerText=channel.description+'支付';
+					content.appendChild(de);
+					checkServices(channel);
+				}
+				info.innerText=txt;
+			},function(e){
+				outLine('获取支付通道失败：'+e.message);
+			});
+		}
+		document.addEventListener('plusready', plusReady, false);
+		// 检测是否安装支付服务
+		function checkServices(pc){
+			if(!pc.serviceReady){
+				var txt=null;
+				switch(pc.id){
+					case 'alipay':
+					txt='检测到系统未安装“支付宝快捷支付服务”，无法完成支付操作，是否立即安装？';
+					break;
+					default:
+					txt='系统未安装“'+pc.description+'”服务，无法完成支付，是否立即安装？';
+					break;
+				}
+				plus.nativeUI.confirm(txt, function(e){
+					if(e.index==0){
+						pc.installService();
+					}
+				}, pc.description);
+			}
+		}
+		
+		var w=null;
+//		var PAYSERVER='http://demo.dcloud.net.cn/payment/?payid=';
+		var WXPAYSERVER = "http://47.92.81.38:8080/qianfeng/wechatPay/unifiedOrder?payid=";
+		var ALIPAYSERVER = "http://47.92.81.38:8080/qianfeng/wechatPay/alipayUnifiedOrder?payid=";
+		// 支付
+		function pay(id){
+			if(w){return;}//检查是否请求订单中
+			if(id==='appleiap'){
+				outSet('应用内支付');
+				clicked('payment_iap.html');
+				return;
+			}
+			outSet('----- 请求支付，组装下单参数 -----');
+			
+			var appid=plus.runtime.appid;
+			var payMoney = document.getElementById('total').value;
+			if(navigator.userAgent.indexOf('StreamApp')>=0){
+				appid='Stream';
+			}
+			if(id=='alipay'){
+				var url=ALIPAYSERVER;
+//				appid= "H5E5FC35D";
+			}else if(id=='wxpay'){
+				var url=WXPAYSERVER;
+				appid= "wxfaa70f63049de4b0";
+			}else{
+				plus.nativeUI.alert('当前环境不支持此支付通道！', null, '捐赠');
+				return;
+			}
+			url+=id;
+			url+='&appid='+appid+'&payMoney='+payMoney;
+			w=plus.nativeUI.showWaiting();
+			// 请求支付订单
+			
+			var xhr=new XMLHttpRequest();
+			xhr.onreadystatechange=function(){
+				switch(xhr.readyState){
+					case 4:
+					w.close();w=null;
+					if(xhr.status==200){
+						var order=JSON.parse(xhr.responseText);
+						var orderSign = "";
+						if(id == 'alipay'){
+							orderSign = order.orderInfo;
+						}else{
+							var orderMsg = order.detail.order;
+							orderSign = orderMsg[0];
+						}
+						outLine('下单成功！：'+JSON.stringify(orderSign), null, '提示');
+						//调起前端支付接口
+						plus.payment.request(pays[id],orderSign,function(result){
+							outLine('----- 支付成功 -----');
+							outLine(JSON.stringify(result));
+							plus.nativeUI.alert('支付成功',function(){
+								back();
+							},'充值');
+						},function(e){
+							outLine('----- 支付失败 -----');
+							outLine('['+e.code+']：'+e.message);
+							plus.nativeUI.alert('', null, '支付失败：'+JSON.stringify(e));
+						});
+					}else{
+						outLine('----- 请求订单失败 -----');
+						outLine( xhr.status);
+						plus.nativeUI.alert('获取订单信息失败！：'+xhr.response, null, '提示');
+					}
+					break;
+					default:
+					break;
+				}
+			}
+			xhr.open('GET',url+"&userId=1823203");
+			outLine('下单：'+url+"&userId=1823203");
+			xhr.send();
+		}
+		</script>
+	</head>
+
+	<body style="background-image: url(../../images/accountBg.jpg);">
+		<header class="mui-bar mui-bar-nav" style="background-color: transparent;">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">我的账户</h1>
+		    <a class="mui-icon-right-nav mui-pull-right" onclick="listOrder()"><span class="mui-icon mui-icon-bars"></span></a>
+		</header>
+		<div class="mui-content" >
+		 <div id="dcontent" class="dcontent">
+			<div class="myAccountBg">
+				<img src="../../images/myAccount.png"/>
+				<h3 class="account">
+				    余额：101.0
+				</h3>
+				<hr color="#EEE"/>
+			</div>
+			<p style="padding: 0 1em;text-align:left;">
+				
+				
+				
+			</p>
+			<br/>
+			<div style="padding: 0 1em;text-align:center">
+				充值金额：<input style="text-align:center" id="total" type="number" value="1"/> 元
+			</div>
+				<p id="info" style="padding: 0 1em;text-align:left;">支持支付方式：
+			</p>
+			<br/>
+			<!--<div class="button" onclick="clicked('payment_iap.html')">Apple IAP</div>-->
+		</div>
+		<div id="output">
+			<!--Payment模块管理支付功能，可通过js调用第三方支付服务。通过plus.payment可获取支付管理对象。-->
+		</div>
+	
+		</div>
+		
+	</body>
+	<script type="text/javascript" src="../../js/h5+/immersed.js" ></script>
+	<script src="../../js/mui.min.js "></script>
+	<script>
+		mui.init({
+			swipeBack: true
+		});
+		mui.plusReady(function() {
+			
+			
+			
+			
+		});
+		
+		function listOrder(){
+			
+			mui.openWindow({
+							url: 'pay-list.html',
+							id: 'pay-list',
+							preload: true,
+							show: {
+								aniShow: 'pop-in'
+							},
+							styles: {
+								popGesture: 'hide'
+							},
+							waiting: {
+								autoShow: false
+							}
+					});
+		}
+		
+	</script>
+
+</html>

@@ -1,0 +1,15 @@
+.content-txt{
+	padding: 3px 8px;
+}
+
+a{
+	color: darkgray;
+}
+
+.content-txt .mui-icon{
+	width: 20px;
+	height: 10px;
+}
+.mui-card-content .content-txt{
+	background-color: #2AC845;
+}

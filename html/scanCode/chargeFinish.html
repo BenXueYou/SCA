@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>充电完成</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/mui.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/my-css/chargeFinish.css"/>
+    <script src="../../js/CONFIG.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+	<header class="mui-bar mui-bar-nav">
+	    <h1 class="mui-title">充电结束</h1>
+	</header>
+	<div class="mui-content" style="background-color: white;">
+         <div id="top">
+			<div id="label">
+				<div class = "text"><span>充电完成</span></div>
+			</div>
+		</div>
+		<div id="mid">
+            <div class="ch" ><span>账单编号：</span><span class="value" id="bill" style="font-size:14px">----</span></div>
+            <div class="ch" ><span>支付金额：</span><span class="value" id="money">0.00</span><span class="ch_span">元</span></div>
+			<div class="ch" ><span>充电时长：</span><span class="value" id="time">0</span><span class="ch_span">分钟</span></div>
+			<div class="ch" ><span>充电电量：</span><span class="value" id="quantity">0.0</span><span class="ch_span">度</span></div>
+            <div class="ch" ><span>已充金额：</span><span class="value" id="chargeMoney">0.00</span><span class="ch_span">元</span></div>  
+            <div class="ch" ><span>退回金额：</span><span class="value" id="refund_fee">0.00</span><span class="ch_span">元</span></div>
+            <div class="ch" ><span>开始时间：</span><span class="value" id="date" style="font-size:14px;">--.--.-- --:--:--</span></div>
+		</div>
+		<div id="upload" style="hidden">
+			<button id="botBtn" onclick="stepfun()">完成</button>
+		</div>
+    </div>
+    <script src="../../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/CONFIG.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/my-js/Order.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/my-js/Pile.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/my-js/User.js" type="text/javascript" charset="utf-8"></script>
+    
+    <script type="text/javascript">
+    		mui.init()
+    		 function getQueryString(name) { 
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
+            var r = window.location.search.substr(1).match(reg); 
+            if (r != null) return unescape(r[2]); return null; 
+        }
+    		
+    		
+    			var selfBack = mui.back;
+			mui.back = function(){
+			
+			var webview=plus.webview.getWebviewById('index.html');
+			if(webview){
+			  webview.hide('none');
+			  webview.show('slide-in-rihgt');
+			}
+			plus.webview.currentWebview().hide();
+			plus.webview.currentWebview().close();
+			}; 
+    		function stepfun(){
+        		mui.back();
+        }
+        //获取传参数
+        var serialNo = getQueryString("serialNo");
+       
+    		var dataInfo = User.getUserChargeData(CONFIGS.CONURLSK(),User.userIsLogin(),serialNo);
+    		  var serialNo = dataInfo.transationId;
+    		document.getElementById("bill").innerHTML = serialNo;
+        document.getElementById("money").innerHTML = dataInfo.totalfee; 
+        document.getElementById("quantity").innerHTML = dataInfo.chargeQuantity;
+        var chargeMoney = dataInfo.chargeMoney;
+        document.getElementById("chargeMoney").innerHTML = dataInfo.chargeMoney;
+        document.getElementById("date").innerHTML = dataInfo.chargeStartTime;
+        document.getElementById("refund_fee").innerHTML = dataInfo.refund;
+        
+        
+       
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/mui.min.css"/>
+</head>
+<body>
+    
+    <header class="mui-bar mui-bar-nav">
+        <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+        <h1 class="mui-title">我的充值记录</h1>
+    </header>
+    <div class="mui-content">
+        <ul class="mui-table-view" id="paylist">
+            <!--<li class="mui-table-view-cell mui-media">
+               
+                   <div class="mui-card">
+						<div class="mui-card-header">页眉</div>
+						<div class="mui-card-content">
+							<div class="mui-card-content-inner">
+								包含页眉页脚的卡片，页眉常用来显示面板标题，页脚用来显示额外信息或支持的操作（比如点赞、评论等）
+							</div>
+						</div>
+						<div class="mui-card-footer">页脚</div>
+					</div>
+              
+            </li>
+           <li class="mui-table-view-cell mui-media">
+                
+                   <div class="mui-card">
+						<div class="mui-card-header">页眉</div>
+						<div class="mui-card-content">
+							<div class="mui-card-content-inner">
+								包含页眉页脚的卡片，页眉常用来显示面板标题，页脚用来显示额外信息或支持的操作（比如点赞、评论等）
+							</div>
+						</div>
+						<div class="mui-card-footer">页脚</div>
+					</div>
+            
+            </li>
+             <li class="mui-table-view-cell ">
+     
+                   <div class="mui-card">
+						<div class="mui-card-header">页眉</div>
+						<div class="mui-card-content">
+							<div class="mui-card-content-inner">
+								包含页眉页脚的卡片，页眉常用来显示面板标题，页脚用来显示额外信息或支持的操作（比如点赞、评论等）
+							</div>
+						</div>
+						<div class="mui-card-footer">页脚</div>
+					</div>
+            
+            </li>-->
+        </ul>
+    </div>
+    <script src="../../js/mui.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="../../js/my-js/PayList.js" ></script>
+    <script type="text/javascript">
+    mui.init()
+    var userId = "1823203";
+    Pay.getPayList(userId,function(e){
+    	
+    	if(e == 101){//没有找到数据
+    		return;
+    	}else if(e == 102){//账号异常
+    		return;
+    	}else if(e == 104){//服务器没有响应
+    		return;
+    	}else{
+    		var paylist = document.getElementById("paylist");
+    		for (var tmp in e) {
+    			var li = document.createElement("li");
+    			li.className = "mui-table-view-cell mui-media";
+    			li.innerHTML ='<div class="mui-card">'+
+						'<div class="mui-card-header">页眉</div>'+
+						'<div class="mui-card-content">'+
+							'<div class="mui-card-content-inner">'+
+								'包含页眉页脚的卡片，页眉常用来显示面板标题，页脚用来显示额外信息或支持的操作（比如点赞、评论等）'+
+							'</div>'+
+						'</div>'+
+						'<div class="mui-card-footer">'+
+						  '页脚'+
+						'</div>'+
+					'</div>';
+			 paylist.appendChild(li);
+    			
+    		}
+    	}
+    	
+    });
+    
+    
+    </script>
+</body>
+</html>
+

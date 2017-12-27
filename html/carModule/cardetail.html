@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<!--标准mui.css-->
+		<link rel="stylesheet" href="../../css/mui.min.css">
+		<link rel="stylesheet" href="../../css/my-css/my-font.css" />
+		<!--App自定义的css-->
+		<!--<link rel="stylesheet" type="text/css" href="../css/app.css"/>-->
+		<style type="text/css">
+			.box{
+				display: flex;
+				justify-content: space-between;
+				padding: 0px 15px;
+			}
+			div{
+				background-color: white;
+			}
+			.box2{
+				display: flex;
+				justify-content: space-between;
+				flex-wrap: wrap;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">汽车详情</h1>
+		</header>
+		<div class="mui-content">
+			<!--<ul class="mui-table-view mui-table-view-chevron">
+				<li id="switch" class="mui-table-view-cell">
+				</li>
+			</ul>-->
+			<div id="slider" class="mui-slider">
+				<div class="mui-slider-group mui-slider-loop">
+					<!-- 额外增加的一个节点(循环轮播：第一个节点是最后一张轮播) -->
+					<div class="mui-slider-item mui-slider-item-duplicate">
+						<a href="#">
+							<img src="../../images/car/car6.jpg">
+							<p class="mui-slider-title">静静看这世界</p>
+						</a>
+					</div>
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="../../images/car/car1.png">
+							<p class="mui-slider-title">幸福就是可以一起睡觉</p>
+						</a>
+					</div>
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="../../images/car/car4.jpg">
+							<p class="mui-slider-title">想要一间这样的木屋，静静的喝咖啡</p>
+						</a>
+					</div>
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="../../images/car/car5.jpg">
+							<p class="mui-slider-title">Color of SIP CBD</p>
+						</a>
+					</div>
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="../../images/car/car6.jpg">
+							<p class="mui-slider-title">静静看这世界</p>
+						</a>
+					</div>
+					<!-- 额外增加的一个节点(循环轮播：最后一个节点是第一张轮播) -->
+					<div class="mui-slider-item mui-slider-item-duplicate">
+						<a href="#">
+							<img src="../../images/car/car1.png">
+							<p class="mui-slider-title">幸福就是可以一起睡觉</p>
+						</a>
+					</div>
+				</div>
+				<div class="mui-slider-indicator mui-text-right">
+					<div class="mui-indicator mui-active"></div>
+					<div class="mui-indicator"></div>
+					<div class="mui-indicator"></div>
+					<div class="mui-indicator"></div>
+				</div>
+			</div>
+			<div class="box  mui-card-header">
+				<div class="">
+					奔驰i8
+				</div>
+				<div class="mui-card-content">
+					<p style="padding:8px 20px 10px 5px;">沪A****9</p>
+				</div>
+			</div>
+			<div class="">
+				<div class="mui-card-content content-txt box">
+					<div>租价：<span style="color: red;font-size: 17px;">220</span>元/天</div>
+					<div>钟点价：<span style="color: red;font-size: 17px;">8</span>元/30分钟</div>
+				</div>
+				<p class="content-txt"><a id="icon-location"><span class="mui-icon mui-icon-location"></span>上海市杨浦区长阳路1080号国际设计交流中心</a></p>
+			</div>
+			<div class="box2 mui-card-footer" >
+				<div class="mui-card-content content-txt">
+					电量：<span style="color: red;font-size: 17px;">87%</span>
+				</div>
+				<!--<div class="mui-card-content content-txt">
+					核载人员：<span style="color: red;font-size: 17px;">2</span>人
+				</div>-->
+				<div class="mui-card-content content-txt">
+					预计续航：<span style="color: red;font-size: 17px;">100</span>KM
+				</div>
+				<div class="mui-card-content content-txt">
+					最高时速：<span style="color: red;font-size: 17px;">100</span>km/h
+				</div>
+				<!--<div class="mui-card-content content-txt">
+					最高时速：<span style="color: red;font-size: 17px;">100</span>km/h
+				</div>-->
+			</div>
+			<div class="mui-bar-footer mui-content-padded">
+				<button type="button" data-loading-text = "预约中" class="mui-btn mui-btn-block mui-btn-primary">预约</button>
+			</div>
+		</div>
+		
+	</body>
+	<script src="../../js/mui.min.js"></script>
+	<script src="../../js/CONFIG.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/my-js/Car.js" type="text/javascript" charset="utf-8"></script>
+	<script>
+
+		var slider = mui("#slider");
+		slider.slider({
+			interval: 3000
+		});
+		mui.plusReady(function(){
+			window.sn = getQueryString("sn");//获取当前车的信息标识
+//			mui.alert(sn);
+			var car = Car.getCarDetail(CONFIGS.CONLOCALURLSBM(),sn);
+			if(car && car != ""){
+				mui.alert("已加载数据："+car);
+			}else{
+//				mui.alert("没有加载到数据");
+			}
+		});
+		
+		function getQueryString(name) { 
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
+            var r = window.location.search.substr(1).match(reg); 
+            if (r != null) return decodeURIComponent(r[2]); return null; 
+        } 
+		mui(document.body).on('tap', '.mui-btn', function(e) {
+            mui(this).button('loading');
+            setTimeout(function() {
+                mui(this).button('reset');
+                mui.fire(plus.webview.all()[0],"appoint",{sn:window.sn});
+//                mui.openWindow({
+//				    id:plus.webview.all()[0].id
+//				  }); 
+//              setMsgToServer();//发送预约信息
+			    mui.back();
+			    
+            }.bind(this), 2000);
+        });
+        
+        
+//获取当前页数据
+        function getCarDetail(sn){
+        		var result="";
+        		mui.ajax("http://192.168.8.161:8080/sbm2.0/rentCar/findCarInfoBySN",{
+        			data:{
+        				SN:sn
+        			},
+        			dataType:"JSON",
+        			type:"GET",
+        			async:false,
+        			timeout:10000,
+        			success:function(data){
+        				result = data;
+        				
+        			},
+        			error:function(xhr,type,error){
+        				mui.alert("网络信号不稳定，请重试");	
+        			}
+        		});
+        		return result;
+        }
+        
+ //发送预约信息      
+        function setMsgToServer(){
+        		var result = false;
+          	plus.storage.setItem('user', 'admin');//本地存储登录用户信息
+        		var user = plus.storage.getItem('user');//获取本地存储的登录用户信息
+        		mui.ajax(url,{
+        			data:{
+        				
+        			},
+        			dataType:"JSON",
+        			type:"GET",
+        			async:false,
+        			timeout:10000,
+        			success:function(data){
+        				result=true;
+        			},
+        			error:function(xhr,type,error){
+        				mui.alert("网络信号不稳定，请重试T—T");
+        			}
+        		});
+        		return result;
+        }
+        
+	</script>
+</html>

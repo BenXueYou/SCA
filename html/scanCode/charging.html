@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>充电中</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/mui.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/my-css/charge.css"/>
+    <style type="text/css">
+  		
+    </style>
+</head>
+<body>
+<header class="mui-bar mui-bar-nav">
+    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+    <h1 class="mui-title">充电中</h1>
+    <a class="txt mui-icon mui-pull-right">强制退出</a>
+</header>
+<div class="mui-content">
+	<div class="">
+		<div class="canvas-wrap">
+		<canvas class="divs" id="myCanvas" width="150"  height="150" style="">您的浏览器不支持canvas！</canvas>
+	  	<span id="MSG" onclick="actiondo()">圆</span>
+	  </div>
+	  <script> 
+         var canvas = document.getElementById('myCanvas'),width = canvas.width,height = canvas.height,ctx = canvas.getContext('2d');  
+         var step,startAngle,endAngle,add=Math.PI*2/100;
+         ctx.shadowOffsetX = 0; // 设置水平位移
+         ctx.shadowOffsetY = 0; // 设置垂直位移
+         ctx.shadowBlur = 10; // 设置模糊度
+         ctx.lineWidth = 1.0; 
+         counterClockwise = false;
+         var x;
+         var y;
+         var radius;
+         var animation_interval = 20,n = 100;
+         var varName;	
+         function actiondo(on_off){
+
+         		if(on_off == false){
+         			
+         			clearInterval(varName);
+         			varName= null;
+					step=1;
+				    startAngle=Math.PI*3/2;
+					endAngle=0;
+					ctx.clearRect(0,0,150,150);
+					return;
+         		}
+                 step=1;
+                 startAngle=Math.PI*3/2;
+                 ctx.strokeStyle ='#299DFF';//圆圈颜色                              
+                 ctx.shadowColor = '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6); //设置阴影颜色
+                 //圆心位置
+                 x=Math.floor(75);
+                 y=Math.floor(75);
+                 radius = Math.floor(75.0);                
+                varName= setInterval(function(){
+                		if (step <= n) {  
+				         endAngle = startAngle + add ;
+				         ctx.beginPath();   
+					     ctx.arc(x, y, radius, startAngle, endAngle, counterClockwise);  
+					     ctx.lineWidth = 3.0;        
+					     ctx.stroke();  
+						 startAngle = endAngle;
+				         step++;  
+				     } else {  
+				        varName= null;
+						step=1;
+				        startAngle=Math.PI*3/2;
+					    endAngle=0;
+					  	ctx.clearRect(0,0,150,150);       
+				     }  
+                }, 50);
+         }
+      </script>
+	  <div id="mid">
+			<div style="overflow: hidden;">
+              <div class="mid_top_right" style="margin:0px 30px; text-align:left;" id="cpid">充电桩编号：----</div>
+                <div class="mid_top_left" style="">
+                    <span class="ch" >充电单价(元/度)：</span>
+                    <span class="ch" id="price">0.00</span>
+                </div>
+                <div class="mid_top_left" style=" ">
+                   <span class="ch" >充电计时(分)：</span>
+                   <span class="ch" id="time">0.00</span>
+                </div>
+                <div class="mid_top_left" style="">
+                    <span class="ch" >计费金额(元)：</span>
+                    <span class="ch" id="fee">0.00</span>
+                </div>
+                <div class="mid_top_left" style="">
+                    <span class="ch" >已充电量(度)：</span>
+                    <span class="ch" id="quantity">0.00</span>
+                </div>
+            </div>
+	         <div style="overflow:hidden">
+	              	<div class="l mid_top_left">
+					<div id="" style="visibility: hidden;">电压(伏)：</div>
+	                <div id="" class="">电压(伏)：</div>
+					<div id="">电流(安)：</div>
+			 </div>
+			<div class="m">
+				<div id="">A相</div>
+				<div id="V">0.00</div>
+				<div id="A">0.00</div>
+			</div>
+			<div class="r">
+				<div id="">B相</div>
+				<div id="V1">0.00</div>
+				<div id="A1">0.00</div>
+			</div>
+			<div class="rc">
+				<div id="">C相</div>
+				<div id="V2">0.00</div>
+				<div id="A2">0.00</div>
+			</div>
+	     </div>
+	     <div class="mid_top_left" style=" text-align:left;">
+	        <span class="mid_top_right">当前时间：</span>
+	        <span class="mid_top_right" id="date">--.--.-- --:--</span>
+	     </div>
+		 </div>
+		<div id="bot">
+			<button id="chargeSwitch" onclick="chargeSwitch()">开始充电</button>
+			<button id="refreshBtn" class="" onclick="getData()">刷新</button>
+		</div>
+	</div>
+</div>
+    <script src="../../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/CONFIG.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/my-js/Order.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/my-js/Pile.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/my-js/User.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+    mui.init();
+   /*
+    * 1.拿到订单，并检查用户的订单
+    * 2.在充电中，则启动充电
+    * 3.已下单状态，则等待启动充电
+    * */
+    var user = User.userIsLogin();
+    var flag = null;
+    var t = null;
+//  user="oR9d21lZxSloF2iQtPHjdRAdy-2o";
+    var order = Order.getMode(CONFIGS.CONURLSBM(),user,function(e){
+    	 document.getElementById("cpid").innerHTML = "充电桩："+e.cpid;
+    });//获取订单信息
+//  mui.alert(order.cpid);
+   
+    function plusReady(){ 
+        if(!window.plus){ 
+            return; 
+        }
+       if(User.UserState(CONFIGS.CONLOCALURLSBM(),user) == "1"){//用户在充电中
+	    		//开启动画，开始刷新数据
+	    		mui.alert("充电中");
+	    		flag=true;
+	    		actiondo(true);
+	    		getData();
+	    		document.getElementById("chargeSwitch").innerHTML = "结束充电";
+			document.getElementById("MSG").innerHTML = "正在充电";
+	    }else{//用户在等待充电状态
+	    		//等待充电状态
+//	    		mui.alert("等待充电");
+	    		flag=false;
+	    		
+	    }
+    } 
+    if(window.plus){ 
+        plusReady(); 
+    }else{ 
+        document.addEventListener('plusready', plusReady, false); 
+    } 
+	
+	function chargeSwitch(){
+		flag = !flag;
+		if(flag && Pile.pileStart(CONFIGS.CONURLSBM(),user)){
+			//开始充电且启动成功
+			actiondo(true);
+			getData();
+			document.getElementById("chargeSwitch").innerHTML = "结束充电";
+			document.getElementById("MSG").innerHTML = "正在充电";
+			
+		}else{
+				mui.confirm("是否结束本次充电","您点击了停止充电",["否","是"],function(e){
+				if(e.index == "0"){ flag = !flag;return;}//点击了否			
+//				var serialNo = Pile.pileStop(CONFIGS.CONURLSBM(),user);
+				var res = User.UserChange(CONFIGS.CONLOCALURLSBM(),User.userIsLogin());
+					serialNo = true;//测试模拟数据
+					if(serialNo && res){
+						actiondo(false);
+						document.getElementById("chargeSwitch").innerHTML = "开始充电";
+						document.getElementById("MSG").innerHTML = "开始充电";
+						location.href="chargeFinish.html?serialNo="+serialNo;
+					}else{
+						//操作失败
+					}
+				},"div");			
+		}
+	}
+	//定时器事件
+		
+	function getData(){
+		
+		clearTimeout(t);
+		t= setInterval(function(){
+			if(flag){
+				var DataInfo = User.getPileChargeData(CONFIGS.CONURLSK(),User.userIsLogin());
+				
+				console.log(JSON.stringify(DataInfo));
+				
+				if(DataInfo.on_off == "0"){
+					//检测到离线，强制退出
+					console.log("离线");
+				}else{
+					if(DataInfo.finish == "finish"){
+						//检测到自动结束
+						location.href="chargeFinish.html?serialNo="+DataInfo.serialNo;
+					}else{
+						document.getElementById("V").innerHTML =  DataInfo.va;
+				        document.getElementById("V1").innerHTML = DataInfo.vb;
+				        document.getElementById("V2").innerHTML = DataInfo.vc;
+						document.getElementById("A").innerHTML = DataInfo.aa;
+				        document.getElementById("A1").innerHTML = DataInfo.ab;
+				        document.getElementById("A2").innerHTML = DataInfo.ac;
+						document.getElementById("fee").innerHTML = DataInfo.fee;
+				        document.getElementById("time").innerHTML = DataInfo.chargeDuration;
+						document.getElementById("quantity").innerHTML = DataInfo.quantity;
+				        document.getElementById("price").innerHTML = DataInfo.price;
+					    document.getElementById("date").innerHTML = DataInfo.dateTime;
+				   }
+				}
+			}else{
+				//清除定时器
+				clearTimeout(t);
+				console.log("清除定时器");
+			}
+         }, 10000);
+
+	}
+    </script>
+</body>
+</html>
+

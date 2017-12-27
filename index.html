@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>地图</title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="css/my-css/map.css"/>
+		<link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+	    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+		<script src="js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			
+			.title {
+				margin: 20px 15px 10px;
+				color: #6d6d72;
+				font-size: 15px;
+				padding-bottom: 51px;
+			}
+			.hidden{
+				display: none;
+			}
+			.box{
+				display: flex;
+				justify-content: space-between;
+			}
+		</style>
+		
+	</head>
+
+	<body>
+	<script src="js/util.js"></script>
+	<script type="text/javascript" src="js/CONFIG.js" ></script>
+    	<script type="text/javascript" src="js/my-js/Order.js" ></script>
+    	<script type="text/javascript" src="js/my-js/Pile.js" ></script>
+    	<script type="text/javascript" src="js/my-js/User.js" ></script>
+    	<script type="text/javascript" src="js/app.js" ></script>
+    	<script src="js/my-js/Car.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			(function() {
+				mui.init({
+					swipeBack: true //启用右滑关闭功能
+				});
+				if(window.plus){
+					plusReady();
+				}else{
+					document.addEventListener('plusready', plusReady, false);
+				}
+				
+				function plusReady(){
+					var self = plus.webview.currentWebview(),
+						leftPos = Math.ceil((window.innerWidth - 60) / 2); // 设置凸起大图标为水平居中
+
+					/**	
+					 * drawNativeIcon 绘制带边框的半圆，
+					 * 实现原理：
+					 *   id为bg的tag 创建带边框的圆
+					 *   id为bg2的tag 创建白色矩形遮住圆下半部分，只显示凸起带边框部分
+					 * 	 id为iconBg的红色背景图
+					 *   id为icon的字体图标
+					 *   注意创建先后顺序，创建越晚的层级越高
+					 */
+					var drawNativeIcon = util.drawNative('icon', {
+						bottom: '5px',
+						left: leftPos + 'px',
+						width: '60px',
+						height: '60px'
+					}, [{
+						tag: 'rect',
+						id: 'bg',
+						position: {
+							top: '1px',
+							left: '0px',
+							width: '100%',
+							height: '100%'
+						},
+						rectStyles: {
+							color: '#fff',
+							radius: '50%',
+							borderColor: '#ccc',
+							borderWidth: '1px'
+						}
+					}, {
+						tag: 'rect',
+						id: 'bg2',
+						position: {
+							bottom: '-0.5px',
+							left: '0px',
+							width: '100%',
+							height: '45px'
+						},
+						rectStyles: {
+							color: '#fff'
+						}
+					}, {
+						tag: 'rect',
+						id: 'iconBg',
+						position: {
+							top: '5px',
+							left: '5px',
+							width: '50px',
+							height: '50px'
+						},
+						rectStyles: {
+							color: '#d74b28',
+							radius: '50%'
+						}
+					}, {
+						tag: 'font',
+						id: 'icon',
+						text: '\ue410', //此为字体图标Unicode码'\e410'转换为'\ue410'
+						position: {
+							top: '0px',
+							left: '5px',
+							width: '50px',
+							height: '100%'
+						},
+						textStyles: {
+							fontSrc: '_www/fonts/mui.ttf',
+							align: 'center',
+							color: '#fff',
+							size: '30px'
+						}
+					}]);
+					// append 到父webview中
+					self.append(drawNativeIcon);
+
+					//自定义监听图标点击事件
+					var active_color = '#fff';
+					
+					drawNativeIcon.addEventListener('click', function(e) {
+						var flag;
+						var userid = User.userIsLogin();
+						if (!userid || !app.getState()) {//判断用户是否登录
+							//没有登录
+							plus.webview.open('html/loginRegist/login.html', 'new', {}, 'slide-in-bottom', 200);
+							return;
+						} 
+						User.UserState(CONFIGS.CONLOCALURLSBM(),userid,function(user_state){
+							
+							if(user_state == 0 && user_state == false){
+								//用户空闲状态可以扫码
+								plus.webview.open('html/scanCode/scanCode.html', 'new', {}, 'slide-in-right', 200);
+							}else if(user_state==99){
+								
+								plus.webview.open('html/loginRegist/login.html', 'new', {}, 'slide-in-right', 200);
+								//plus.webview.open('html/scanCode/scanCode.html', 'new', {}, 'slide-in-right', 200);
+								
+							}else{
+								//用户已产生订单，获取订单信息，且直接进入充电界面
+								plus.webview.open('html/scanCode/charging.html', 'new', {}, 'slide-in-right', 200);
+							}
+							
+						});
+						
+						// 重绘字体颜色
+						if(active_color == '#fff') {
+							drawNativeIcon.drawText('\ue410', {}, {
+								fontSrc: '_www/fonts/mui.ttf',
+								align: 'center',
+								color: '#000',
+								size: '30px'
+							}, 'icon');
+							active_color = '#000';					
+						} else {
+							drawNativeIcon.drawText('\ue410', {}, {
+								fontSrc: '_www/fonts/mui.ttf',
+								align: 'center',
+								color: '#fff',
+								size: '30px'
+							}, 'icon');
+							active_color = '#fff';
+						}
+
+					});
+					// 中间凸起图标绘制及监听点击完毕
+
+					// 创建子webview窗口 并初始化
+					var aniShow = {};
+					util.initSubpage(aniShow);
+					
+					var 	nview = plus.nativeObj.View.getViewById('tabBar'),
+						activePage = plus.webview.currentWebview(),
+						targetPage,
+						subpages = util.options.subpages,
+						pageW = window.innerWidth,
+						currIndex = 0;
+					
+						
+					/**
+					 * 根据判断view控件点击位置判断切换的tab
+					 */
+					nview.addEventListener('click', function(e) {
+						var clientX = e.clientX;
+						if(clientX > 0 && clientX <= parseInt(pageW * 0.25)) {
+							currIndex = 0;
+						} else if(clientX > parseInt(pageW * 0.25) && clientX <= parseInt(pageW * 0.45)) {
+							currIndex = 1;
+						} else if(clientX > parseInt(pageW * 0.45) && clientX <= parseInt(pageW * 0.8)) {
+							currIndex = 2;
+						} else {
+							currIndex = 3;
+						}
+						// 匹配对应tab窗口	
+						if(currIndex > 0) {
+							targetPage = plus.webview.getWebviewById(subpages[currIndex - 1]);
+						} else {
+							targetPage = plus.webview.currentWebview();
+						}
+
+						if(targetPage == activePage) {
+							return;
+						}
+
+						if(currIndex !== 3) { 
+							//底部选项卡切换
+							util.toggleNview(currIndex);
+							// 子页面切换
+							util.changeSubpage(targetPage, activePage, aniShow);
+							//更新当前活跃的页面
+							activePage = targetPage;
+						} else {
+							//第四个tab 打开新窗口
+							plus.webview.open('html/my.html', 'new', {}, 'slide-in-right', 200);
+						}
+					});
+				};
+				
+			
+			})();
+var li = document.createElement('li');
+window.addEventListener('appoint',function(event){
+  //获得事件参数
+  var sn = event.detail.sn;
+  //根据id向服务器请求预约详情
+  
+  
+	li.className = 'li-cell';
+	li.innerHTML = '<a class="">'+
+				'<div class="mui-card">'
+				    +'<div class="mui-card-header" style="color: #333;">'
+				    +"预约倒计时：30分钟"
+				    +'</div>'
+					+'<div class="mui-card-header mui-card-media" style="height:40vw;background-image:url(images/car/timg.jpg)"></div>'
+					+'<div class="mui-card-content">'
+						+'<div class="mui-card-content-inner">'
+							+'<a class="mui-card-link" style="color: #333;">地址：上海市杨浦区长阳路1080号</a>'
+							+'<div class="box">'
+								+'<i style="color: #333;">价格：8元/30分钟</i>'
+								 +'<i style="color: #333;">封顶：220元/日</i>'
+							+'</div>'
+					     +'</div>'
+					+'</div>'
+					+'<div class="mui-card-footer box">'
+//						+'<a class="mui-card-link op-btn">开启车门</a>'
+						+'<div class="mui-input-row">'
+						   + '<label>车门</label>'
+						   +' <div id="door-switch" class="mui-switch mui-active mui-switch-blue">'
+						        +'<div class="mui-switch-handle"></div>'
+						   +' </div>'
+						+'</div>'
+						+'<a class="mui-card-link cancel-btn" target='+sn+'>取消订单</a>'
+					+'</div>'
+				+'</div>'
+			+'</a>';
+	var cons = document.getElementById("appointView");
+	cons.appendChild(li);
+    mui("#appointView")[0].classList.remove("hidden");
+ 	mui('.mui-switch').each(function() {
+		mui(this).switch();
+	});
+	//开启车门
+	var isManual = false;//标志按钮最后状态
+	//对按钮进行监听
+	 document.getElementById("door-switch").addEventListener('toggle', function(event){
+	      isManual=!isManual;
+	      mui.alert("车门:"+isManual);
+	 });
+	//取消订单
+	mui('.mui-table-view').on('tap','.cancel-btn',function(e){
+		var index = this.target;
+		mui.alert("取消预约----"+index);
+		mui("#appointView")[0].classList.add("hidden");
+							
+	});
+  
+});	
+</script>
+		<div class="mui-content">
+			<div class="title"></div>
+			<div id="container"></div>	
+			<div id="myPageTop" style="height:45px !important; text-align: center;">
+			    <table>
+			        <tr>
+			          <td>
+			        		<!--<button type="submit" class="cs_btn" value="" onclick="csBtnFun()"></button>-->
+			        		<div onclick="csBtnFun()"><span class="mui-icon mui-icon-list"></span></div>
+			          </td>
+			          <td>	
+			            <input type="text" placeholder="请输入关键字进行搜索" id="tipinput" >
+			          </td>
+			        </tr>
+			    </table>
+			</div>
+			<ul id="appointView" class="mui-table-view mui-bar-footer hidden">
+			</ul>
+		</div>
+<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&key=d3a5c9286bb4f21b2cd3054951030da4&plugin=AMap.Autocomplete"></script>
+<script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+<script type="text/javascript">
+    //全局变量
+    var lng = "";//经度
+    var lat = "";//纬度
+  //  var urlM = "http://116.236.237.244:8080/SuperBackManage/";//请求主路径
+  var urlM = "http://139.129.194.195:8080/SuperBackManage/";
+    var CSID;
+    var infwin;
+    var markerList = new Array();
+    var markers = new Array();
+    var flag = 0;
+    //获取当前经纬度
+     var map, geolocation;
+    //加载地图，调用浏览器定位服务
+    map = new AMap.Map('container', {
+        resizeEnable: true,
+    });
+   // map.setZoom{}
+    //点击空白处关闭窗口
+    map.on('click',function(){
+	    	if(infwin)
+	    	var isOn = infwin.getIsOpen();
+	    window.closeInfoWindow();
+    })
+    
+    //搜索事件
+     var auto = new AMap.Autocomplete({
+        input: "tipinput"
+    });
+    AMap.event.addListener(auto, "select", select);//注册监听，当选中某条记录时会触发
+    function select(e) {
+        if (e.poi && e.poi.location) {
+            map.setZoom(10);
+            map.setCenter(e.poi.location);
+        }
+    }
+  
+   //定位获取经纬度
+    map.plugin('AMap.Geolocation', function() {   
+        geolocation = new AMap.Geolocation({
+            enableHighAccuracy: true,//是否使用高精度定位，默认:true
+            timeout: 10000,          //超过10秒后停止定位，默认：无穷大
+            buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+            zoomToAccuracy: true,      //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+            buttonPosition:'RB'
+        });
+        map.addControl(geolocation);
+        geolocation.getCurrentPosition();
+        AMap.event.addListener(geolocation, 'complete', onComplete);//返回定位信息
+        AMap.event.addListener(geolocation, 'error', onError);      //返回定位出错信息
+    });
+    
+    //解析定位结果
+    function onComplete(data) {
+        lng = data.position.getLng();
+        lat = data.position.getLat();
+         getFindSMPByMap(lng,lat);       
+		console.log("获取经度："+lng+"纬度："+lat);
+    }
+    //解析定位错误信息
+    function onError(data) {
+        alert('定位失败');
+    }
+    //点击跳转列表页
+    function csBtnFun(){
+    	 if(lng && lat) {
+//  	 	location.href = "html/pilelist.html?longitude="+lng+"&latitude="+lat;
+		plus.webview.open("html/pilelist.html?longitude="+lng+"&latitude="+lat,"",{},"slide-in-right",200);
+    	 }
+    }
+    //点击进入详情页
+    function stepToDetail(e){
+// 	 	alert(e);
+      	location.href = "pileModule/pileDetail.html?csid="+e+"&lng="+lng+"&lat="+lat;
+    }
+   // getFindSMPByMap();http://116.236.237.244:8080/Shanxi_tank/mapSearchPile/findSMPByMap
+    //根据经纬度请求站列表
+    function getFindSMPByMap(lg,la){
+    
+        var ajax = $.ajax({
+        	type:"GET",
+        url:urlM +"mapSearchPile/findSMPByMap",
+        dataType:"json",
+        	data:{
+            		longitude:lg,
+                latitude:la
+            },
+        	success: function(data) {	
+            if(data.returnCode == 0){     
+            	var detail = data.detail;
+            	var csList = detail.csList;
+           		for(var h=0;h<csList.length;h++){
+                    var latitude = csList[h]['latitude'];//经纬度
+                    var longitude = csList[h]['longitude'];//地址
+                    var distance = csList[h]['distance'];//距离
+            			var csid = csList[h]['csid'];//站编号
+            			CSID = csid;
+                    //console.log(detail);
+                    //根据站列表循环创建大头针
+                    addMarker(latitude,longitude,csid,h);
+                }
+        	   }
+        },
+        	error: function(jqXHR) {
+            	alert("网络请求站列表发生错误");
+        	},
+
+        });
+    }
+    //创建大头针
+     function addMarker(lng,lat,csid,h) {
+         var marker = new AMap.Marker({
+              icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+               position: [lat, lng]
+          });
+        marker.setMap(map);
+        markers.push(marker);
+         //根据大头针循环创建信息窗口
+         getFindSMPInfoById(lng,lat,csid,marker,h);
+        
+     }
+    //创建信息窗口
+    function getFindSMPInfoById(lng,lat,csid,emarker,j){
+//  	console.log("============h====="+j);
+   	 	flag++;
+    		var ajax = $.ajax({
+    			type:"get",
+    			url:urlM+"mapSearchPile/findSMPInfoById",
+    			dataType:"json",
+	        	data:{
+	        		type:"cs",
+	        		id:csid,
+	            	longitude:lng,
+	            latitude:lat
+	            },
+	        	success: function(data) {
+	        		//测试是否循环创建
+//	        		console.log('测试是否循环创建信息窗口'+JSON.stringify(data));
+	            if(data.returnCode == 0){
+					var detail = data.detail;
+					var cs = detail.cs;
+	                for(var h=0;h<cs.length;h++){
+	            			var chargefee = cs[h]['chargefee'];//充电电价
+	            			var appiontfee = cs[h]['appiontfee'];//预约费
+	            			var servicefee = cs[h]['servicefee'];//服务费
+	            			var parkfee = cs[h]['parkfee'];//停车费
+	            			var operatorid = cs[h]['operatorid'];
+	            			var rateid = cs[h]['rateid'];
+	            			var validflag = cs[h]['validflag'];
+	            			var opentime = cs[h]['opentime'];
+	            			CSID = csid;
+	                    //console.log(detail);
+					//实例化信息窗体
+					    var title = cs[h]['name']+'<span style="margin-left:10px;font-size:11px;color:#F00;">距离:'
+					    +cs[h]['distance']+'</span>'
+					    +"<button style='margin:0 0 0 30px;background-color:white;outline:none;border:0px solid #299dff;"+
+					    "border-radius:5px;color:#299dff' value = "+j+" class='navBtn'} >导航</button>",
+					    content = [];
+					    content.push("<img src='http://tpc.googlesyndication.com/simgad/5843493769827749134'>地址："+cs[h]['location']);
+					    content.push("直流桩："+cs[h]['dcisnum']+"/"+cs[h]['dcnum']+'&nbsp&nbsp&nbsp'+"交流桩："+cs[h]['acisnum']+"/"+cs[h]['acnum']);
+//					    content.push("</hr>");
+					    content.push("充电费:"+cs[h]['chargefee']+'元&nbsp&nbsp&nbsp'+
+					    "服务费:"+cs[h]['servicefee']+'元&nbsp&nbsp&nbsp'+
+					    "停车费:"+cs[h]['parkfee']+'元'+
+					    "<button style='font-size:10px;color:#299DFF;bordr:0px;' onclick='stepToDetail("+csid+")'>详细信息</button>");
+					   
+					 	markerList.push(name);
+					    var infoWindow = new AMap.InfoWindow({
+					        isCustom: true,  //使用自定义窗体
+					        content: createInfoWindow(title, content.join("<br/>")),
+					        offset: new AMap.Pixel(35,-50)
+					    });
+	                    AMap.event.addListener(emarker, 'click', function() {
+				            infoWindow.open(map, emarker.getPosition());
+				        }); 
+	            }
+	        	}
+	        },
+	        	error:function(jqXHR) {
+	            	alert("网络请求站点信息发生错误");
+	        	},
+    		});
+    }
+    		$(document).on('click', '.navBtn', function(e) {			
+			var j = $(this).val();
+			var emarker = markers[j];
+		   	emarker.markOnAMAP({
+				position: emarker.getPosition(),
+				name:markerList[j]//name属性在移动端有效
+		   })
+		});      
+
+    //构建自定义信息窗体
+    function createInfoWindow(title, content) {
+        var info = document.createElement("div");
+        info.className = "info";
+//		console.log('测试是否循环调用窗口'+title);
+        //可以通过下面的方式修改自定义窗体的宽高
+        // 定义顶部标题
+        var top = document.createElement("div");
+        var titleD = document.createElement("div");
+        var closeX = document.createElement("img");
+        top.className = "info-top";
+        titleD.innerHTML = title;
+        closeX.src = "http://webapi.amap.com/images/close2.gif";
+        closeX.onclick = closeInfoWindow;
+
+        top.appendChild(titleD);
+        top.appendChild(closeX);
+        info.appendChild(top);
+
+        // 定义中部内容
+        var middle = document.createElement("div");
+        middle.className = "info-middle";
+        middle.style.backgroundColor = 'white';
+        middle.innerHTML = content;
+        info.appendChild(middle);
+
+        // 定义底部内容
+        var bottom = document.createElement("div");
+        bottom.className = "info-bottom";
+        bottom.style.position = 'relative';
+        bottom.style.top = '0px';
+        bottom.style.margin = '0 auto';
+        var sharp = document.createElement("img");
+        sharp.src = "http://webapi.amap.com/images/sharp.png";
+        bottom.appendChild(sharp);
+        info.appendChild(bottom);
+        return info;
+    }
+
+    //关闭信息窗体
+    function closeInfoWindow() {
+        map.clearInfoWindow();
+    } 
+</script>	
+
+	</body>
+</html>

@@ -1,0 +1,119 @@
+body{
+	background-color:/* rgb(255,255,255);*/;
+	background-color: white!important;
+	}
+			#top{
+				margin: 0 auto;
+				width: 250px;
+				height: 150px;
+			}
+			#label{
+                background:no-repeat;
+                background-image: url(../../images/charging03.png);
+				height: 100%;
+				overflow: hidden;
+				text-align: center;
+				/*vertical-align: middle;*/
+			}
+			#top #label div{
+				/*background-color:red ;*/
+				margin-top: 150px;
+			}
+			span{
+				font-size: 15px;
+				color: black;
+				font: '微软雅黑'; 
+				/*line-height: 30px;*/
+			}
+			#mid{
+				width: 90%;
+				max-width: 400px;
+				margin: 15px auto auto auto;
+				padding: 15px 5px;
+				background-color:rgba(89,156,81,0.2) ;
+				text-align: center;
+				overflow: hidden;
+				-moz-box-shadow:2px 2px 10px 4px #04BE02 inset;             /* For Firefox3.6+ */
+				-webkit-box-shadow:2px 2px 10px 4px #04BE02 inset;          /* For Chrome5+, Safari5+ */
+				box-shadow: 0px -1px 1px 1px rgba(89,156,81,0.3) inset,  /*上*/
+							-1px 0px 1px 1px rgba(89,156,81,0.3) inset,  /*左*/
+							0px 0px 1px 1px rgba(89,156,81,0.3) inset,   /*右*/
+							0px 1px 1px 1px rgba(89,156,81,0.3) inset;   /*下*/
+			}
+			.ch{
+				width: 90%;
+				float: left;
+				margin:1% 0 1% 10%;
+                overflow: hidden;
+                position:relative;
+				/*padding: 5%;*/    
+			}
+			.ch span{
+				display: block;
+				float: left;
+				font-family: arial;
+				margin-left:0px;
+				margin-top: 1%;
+				font-size: 14px;
+                text-align: center;
+                color:#222222;
+               
+			}
+            .ch_span{
+                float:right;
+                position:absolute;
+                right:30%;  
+            }
+            .value{
+            	line-height:20px;
+            }
+            
+			#bot{
+				text-align: center;
+				margin-top: 5%;
+			}
+			#drop{
+				text-align: center;
+				overflow: hidden;	
+			}
+			#stop{
+				display: block;
+				padding: 15px 1%;
+				width: 20%;
+                font-size:15px;
+			 	color: black;
+				/*background-color:rgb(247,192,68) ;*/
+				float: left;
+			}
+			#clink{
+				float: left;
+				width: 60%;
+				background-color:rgb(106,142,244) ;
+                position: relative;
+			}
+			
+			
+			#upload{
+				text-align: center;
+			}
+			#upload button{
+				background-color: orange;
+				width: 40%;
+				height: 50px;
+				line-height: 30px;
+				margin: 50px auto;
+				font-size: 15px;
+			}
+            .hidden{
+                
+            	display:none;
+            }
+            
+            #mask{
+            	position:absolute; 
+                left:0px;
+                top:-20px;
+                width:100%;
+                height:630px;          
+                background-color:rgba(80,80,80,0.3);
+            }

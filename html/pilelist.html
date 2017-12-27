@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--设定页面使用的字符集。 -->
+		<meta charset="UTF-8">
+		<!--设置兼容IE浏览器-->
+		<meta http-equiv="X-UA-Compatible" content="IE=8"/>
+		<!--设定网页的到期时间，定Expires值为一个早已过去的时间，那么访问此网时若重复在地址栏按回车，那么每次都会重复访问-->
+		<meta http-equiv="Expires" content="0">
+		<!--是用于设定禁止浏览器从本地机的缓存中调阅页面内容，设定后一旦离开网页就无法从Cache中再调出 -->
+        <meta http-equiv="Pragma" content="no-cache">
+        <!--清除缓存（再访问这个网站要重新下载！）-->
+        <meta http-equiv="Cache-control" content="no-cache">
+        <!--经过一段时间转到另外某个页面 -->
+        <!-- <meta http-equiv="refresh" content="0; url="> -->
+	<title>列表页</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+	<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&key=a668a7bf772ef0e195642264ba825493&plugin=AMap.Autocomplete,AMap.PlaceSearch"></script>
+    	<script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+	
+        <style type="text/css">
+			body{
+				background-color: lightgray;
+			}
+			*{
+				padding: 0px;
+				margin: 0px;
+			}
+			ul{
+				margin: 5px 5px;
+			}
+			ul li{
+				list-style: none;
+				overflow: hidden;
+				background-color: white;
+				padding: 10px 0;
+                margin-bottom:1px;
+			}
+			.left{
+				float: left;
+			}
+			.cs_img{
+				margin: 10px 10px 2px 10px;
+				width: 80px;
+				height: 80px;
+				border-radius:40px ;
+			}
+			.csName{
+				width: 40%;
+				margin: 3px 5px;
+				font-size: 16px;
+				font-weight: 700;
+			}
+			.location{
+				width: 60px;
+				height: 30px;
+				margin-right:10px;
+				float: right;
+				position: relative;
+			}
+			.location button{
+				padding: 3px 5px;
+				display: block;
+				margin: 0px;
+			}
+			.location span{
+				position: absolute;
+				font-size: 12px;
+				padding: 0;
+				margin: 0px;
+				top: 18px;
+			}
+			#address{
+				margin: 5px 0;
+				width: calc(100% - 100px);
+				float: left;
+				font-size: 14px;
+				color: gray;
+				text-align: left;
+			}
+			.pile{
+				float:left;
+				background-color: blue;
+				position: relative;
+				width: 60%;
+				margin: 10px 0;
+			}
+			.pile div{
+				position: absolute;
+				font-size: 14px;
+				color: gray;
+			}
+			.DCdiv{
+				left: 0px;
+				top: 0px;
+			}
+			.ACdiv{
+				top: 0px;
+				right: 0px;
+			}
+            .ButtonBorderClass{
+                border:0px;
+                background-color:white;
+            }
+            .distanceTxt{
+                padding-top:5px;
+            }
+			.onc{
+				cursor:pointer;
+			}
+			.mui-title {
+				padding: 20px 15px 10px;
+				color: #6d6d72;
+				font-size: 15px;
+				background-color: #fff;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <h1 class="mui-title">充电站列表</h1>
+		</header>
+		<div class="contain">
+			<ul class="con" id="contain"> </ul>
+		</div>
+	</body>
+	<script src="../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/CONFIG.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/my-js/Pile.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		mui.init();
+		var lng;
+		var lat;
+		var cslist;
+		var marketArr = new Array();
+		function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+
+        lng = getQueryString("longitude");
+        lat = getQueryString("latitude");
+		mui.init();
+		cslist = Pile.getPileList(CONFIGS.CONURLSK());
+		if(cslist){
+			loadListView(cslist);
+		}else{
+			mui.alert("没有加载到数据");
+		}
+		function loadListView(csList){
+			for(var i = 0;i < csList.length; i++){
+					var market = new AMap.Marker({
+            				position:[csList[i].longitude,csList[i].latitude]
+        				});
+                marketArr.push(market);
+                	   var con = document.getElementById("contain");
+                    var li = document.createElement('li');
+                    li.setAttribute('class','onc');
+                    li.setAttribute('value',i);
+                    con.appendChild(li);
+                    //icon
+                    var img = document.createElement('img');
+                    img.setAttribute('class','left cs_img');
+                    img.setAttribute('src','../images/13.jpg');
+                    li.appendChild(img);
+                    //csname
+                    var div_div = document.createElement('div');
+                    div_div.setAttribute('class','left csName');
+                    div_div.innerHTML = csList[i].name;
+                    li.appendChild(div_div);
+                    //导航
+                    var div_div_div = document.createElement('span');
+                    div_div_div.setAttribute('class','location');
+                    li.appendChild(div_div_div);
+//                  导航按钮
+                    var div_3_button = document.createElement('button');
+                    div_3_button.innerHTML = "导航";
+                		div_3_button.setAttribute('class','ButtonBorderClass');
+                    div_3_button.setAttribute('value',i);
+                    div_div_div.appendChild(div_3_button);
+                    //导航图片
+                    var button_img = document.createElement('img');
+                    button_img.setAttribute('src','../images/navicon.png');
+                    div_3_button.appendChild(button_img);
+                    //导航距离
+                    var div_3_span2 = document.createElement('span');
+                    div_3_span2.innerHTML = csList[i].distance+'km';
+                    div_div_div.appendChild(div_3_span2);
+                  	//充电桩数据
+                    var div_pile = document.createElement('div');
+                    div_pile.setAttribute('class','pile');
+                    li.appendChild(div_pile);
+                    //交流桩数据
+                    var div_pile_div2 = document.createElement('div');
+                    div_pile_div2.setAttribute('class','ACdiv');
+                    div_pile.appendChild(div_pile_div2);
+                    var div_3l_spanl = document.createElement('span');
+                    div_3l_spanl.innerHTML = '交流桩：'+csList[i].acisnum+' / ';
+                    div_pile_div2.appendChild(div_3l_spanl);
+                    var span_qtl = document.createElement('span');
+                    span_qtl.innerHTML = csList[i].acnum;
+                    div_3l_spanl.appendChild(span_qtl);
+                    //直流桩数据
+                     var div_pile_div = document.createElement('div');
+                    div_pile_div.setAttribute('class','DCdiv');
+                    div_pile.appendChild(div_pile_div);
+
+                    var div_3_spanl = document.createElement('span');
+                    div_3_spanl.innerHTML = '直流桩：'+csList[i].dcisnum+' / ';
+                    div_pile_div.appendChild(div_3_spanl);
+                    var span_qt = document.createElement('span');
+                    span_qt.innerHTML = csList[i].dcnum;
+                    div_3_spanl.appendChild(span_qt);	
+					//地址
+                    var div_address = document.createElement('div');
+                    div_address.setAttribute('id','address');
+                    div_address.innerHTML = csList[i].location;
+                    li.appendChild(div_address);
+                    div_div.appendChild(document.createElement("br"));
+                }
+		}
+	mui(document).on('click', 'li', function(e) {
+		var i = $(this).val();
+		csid = cslist[i].csid;
+		lat = cslist[i].latitude;
+		lng = cslist[i].longitude;
+		mui.plusReady(function(){
+			var pileDetail = plus.webview.create("pileModule/piledetail.html","new",{top:"0px",bottom:"0px"},{lat:lat,lng:lng,csid:csid});
+			pileDetail.show();
+		});
+	});
+	var map = new AMap.Map('container', {
+       		 resizeEnable: true,
+    });
+	$(document).on('click', 'button', function(e) {
+//		var i = $(this).val();
+//			var i = $(this).val()
+//          var marker = marketArr[i];
+//          marker.markOnAMAP({
+//                 position: marker.getPosition(),
+//                 name:cslist[i].location//name属性在移动端有效
+//          })
+	});
+	</script>
+</html>

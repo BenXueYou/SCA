@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>汽车列表</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="../css/mui.min.css">
+		<link rel="stylesheet" type="text/css" href="../css/app.css" />
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			.title {
+				padding: 20px 15px 10px;
+				color: #6d6d72;
+				font-size: 15px;
+				background-color: #fff;
+				text-align: center;
+			}
+			.box{
+				display: flex;
+				justify-content: space-between;
+			}
+			.mui-card-footer .mui-card-link{
+				/*width: 50%;
+				text-align: center;*/
+			}
+		</style>
+	</head>
+	<body>
+		<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+			<div class="mui-scroll">
+				<div class="title">
+					汽车列表
+				</div>
+				<ul id="con" class="mui-table-view mui-table-view-chevron">
+				
+			<!--<li>
+				<a class="">
+							<div class="mui-card">
+								<div class="mui-card-header mui-card-media" style="height:40vw;background-image:url(../images/car/timg.jpg)"></div>
+							     <div class="mui-card-content">
+									<div class="mui-card-content-inner">
+										<p style="color: #333;">宝马i8</p>
+										<div class="box">
+											 <i style="color: #333;">价格：8元/30分钟</i>
+										     <i style="color: #333;">封顶：220元/日</i>
+										</div>
+									</div>
+							 	 </div>
+								<div class="mui-card-footer">
+								 <a class="mui-card-link">电量：80%</a>
+								  <a class="mui-card-link detail-btn">查看更多信息</a>
+								</div>
+							</div>
+						</a>
+				
+			</li>-->
+				</ul>
+			</div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/CONFIG.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/my-js/Car.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+			mui.init({
+				swipeBack: false,
+				pullRefresh: {
+					container: '#pullrefresh',
+					down: {
+						style:'circle',
+						callback: pulldownRefresh
+					},
+					up: {
+						contentrefresh: '正在加载...',
+						callback: pullupRefresh
+					}
+				}
+			});
+
+		if(window.plus){
+			
+		
+			
+		}else{
+			
+		
+		}
+
+(function($){
+	initHtml();	
+})(mui);
+
+function initHtml(){
+	var dataList = Car.getCarList(CONFIGS.CONURLSBM());
+	var con = document.getElementById("con");
+	for (var i = 0;i<dataList.length;i++) {
+		var car = dataList[i];
+		var li = document.createElement('li');
+		li.className = "li-cell";
+		li.setAttribute('value',car.sn);
+		li.innerHTML = '<a class="">'+
+							'<div class="mui-card">'
+								+'<div class="mui-card-header mui-card-media" style="height:40vw;background-image:url(../images/car/car.jpg)"></div>'
+							     +'<div class="mui-card-content">'
+									+'<div class="mui-card-content-inner">'
+										+'<p style="color: #333;">'+car.carPlate+'</p>'
+										+'<div class="box">'
+											 +'<i style="color: #333;">价格：'+car.hour+'元/30分钟</i>'
+										     +'<i style="color: #333;">封顶：'+car.day+'元/日</i>'
+										+'</div>'
+									+'</div>'
+							 	 +'</div>'
+								+'<div class="mui-card-footer">'
+								  +'<a class="mui-card-link">电量：'+car.carSoc+'</a>'
+								  +'<a class="mui-card-link detail-btn">查看更多信息</a>'
+								+'</div>'
+							+'</div>'
+						+'</a>';
+		con.appendChild(li);
+	}
+}
+				
+			/**
+			 * 下拉刷新具体业务实现
+			 */
+			function pulldownRefresh() {
+				setTimeout(function() {
+					var table = document.body.querySelector('.mui-table-view');
+					var cells = document.body.querySelectorAll('.mui-table-view-cell');
+					for(var i = cells.length, len = i + 3; i < len; i++) {
+						var li = document.createElement('li');
+//						li.className = 'mui-table-view-cell';
+						li.className = 'li-cell';
+						li.setAttribute('value',i);
+						li.innerHTML = '<a class="">'+
+							'<div class="mui-card">'
+								+'<div class="mui-card-header mui-card-media" style="height:40vw;background-image:url(../images/car/car.jpg)"></div>'
+							     +'<div class="mui-card-content">'
+									+'<div class="mui-card-content-inner">'
+										+'<p style="color: #333;">宝马i8</p>'
+										+'<div class="box">'
+											 +'<i style="color: #333;">价格：8元/30分钟</i>'
+										     +'<i style="color: #333;">封顶：220元/日</i>'
+										+'</div>'
+									+'</div>'
+							 	 +'</div>'
+								+'<div class="mui-card-footer">'
+								  +'<a class="mui-card-link">电量：80%</a>'
+								  +'<a class="mui-card-link detail-btn">查看更多信息</a>'
+								+'</div>'
+							+'</div>'
+						+'</a>';
+						//下拉刷新，新纪录插到最前面；
+						table.insertBefore(li, table.firstChild);
+					}
+					mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //refresh completed
+					mui.toast('下拉刷新成功');
+				}, 1000);
+			}
+			var count = 0;
+			/**
+			 * 上拉加载具体业务实现
+			 */
+			function pullupRefresh() {
+				setTimeout(function() {
+					mui('#pullrefresh').pullRefresh().endPullupToRefresh((++count > 2)); //参数为true代表没有更多数据了。
+					var table = document.body.querySelector('.mui-table-view');
+					var cells = document.body.querySelectorAll('.mui-table-view-cell');
+					for(var i = cells.length, len = i + 2; i < len; i++) {
+						var li = document.createElement('li');
+//						li.className = 'mui-table-view-cell';
+						li.className = 'li-cell';
+						li.setAttribute('value',i);
+						li.innerHTML = '<a class="">'+
+							'<div class="mui-card">'
+								+'<div class="mui-card-header mui-card-media" style="height:40vw;background-image:url(../images/car/car.jpg)"></div>'
+							     +'<div class="mui-card-content">'
+									+'<div class="mui-card-content-inner">'
+										+'<p style="color: #333;">宝马i8</p>'
+										+'<div class="box">'
+											 +'<i style="color: #333;">价格：8元/30分钟</i>'
+										     +'<i style="color: #333;">封顶：220元/日</i>'
+										+'</div>'
+									+'</div>'
+							 	 +'</div>'
+								+'<div class="mui-card-footer">'
+								  +'<a class="mui-card-link">电量：100%</a>'
+								  +'<a class="mui-card-link detail-btn">查看更多信息</a>'
+								+'</div>'
+							+'</div>'
+						+'</a>';
+						table.appendChild(li);
+					}
+				}, 1000);
+			}
+			mui('.mui-table-view').on('click','.li-cell',function(){
+		
+					var index = this.value;
+					mui.plusReady(function(){
+						plus.webview.open("carModule/cardetail.html?sn="+index,'new',{},'slide-in-right',200);
+					});
+						
+			});
+			mui('.mui-table-view').on('click','.detail-btn',function(){
+					mui.plusReady(function(){
+//						plus.webview.open("carModule/cardetail.html",{id:"new",name:"123"},{},'slide-in-right', 200);
+//						plus.webview.op
+					});
+						
+			});
+			
+		</script>
+	</body>
+
+</html>
